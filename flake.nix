@@ -6,13 +6,13 @@
   outputs = { self, flake-utils, nixpkgs }: (flake-utils.lib.eachDefaultSystem (
     system:
     let
-      sources = import ./nix/sources.nix;
-      pkgs = nixpkgs.legacyPackages.${system}.extend (import "${sources.poetry2nix}/overlay.nix");
-      openconnect-sso = (import ./nix { inherit pkgs; }).openconnect-sso;
+      pkgs = nixpkgs.legacyPackages.${system};
+      overlay = import ./overlay.nix;
+      pkgsWithOverlay = pkgs.extend overlay;
     in
     {
-      packages = { inherit openconnect-sso; };
-      defaultPackage = openconnect-sso;
+      packages = { inherit (pkgsWithOverlay) openconnect-sso; };
+      defaultPackage = pkgsWithOverlay.openconnect-sso;
     }
   ) // {
       overlay = import ./overlay.nix;
