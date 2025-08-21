@@ -6,7 +6,8 @@
   outputs = { self, flake-utils, nixpkgs }: (flake-utils.lib.eachDefaultSystem (
     system:
     let
-      pkgs = nixpkgs.legacyPackages.${system};
+      sources = import ./nix/sources.nix;
+      pkgs = nixpkgs.legacyPackages.${system}.extend (import "${sources.poetry2nix}/overlay.nix");
       openconnect-sso = (import ./nix { inherit pkgs; }).openconnect-sso;
     in
     {
