@@ -14,8 +14,11 @@ let
   inherit (qtLibsFor pkgs.python3Packages.pyqt5) callPackage;
   pythonPackages = pkgs.python3Packages;
 
-  openconnect-sso = callPackage ./openconnect-sso.nix { 
-    inherit (pkgs) python3Packages poetry2nix; 
+  # Use standard Python derivation approach since poetry2nix is incompatible
+  openconnect-sso = callPackage ./openconnect-sso-standard.nix { 
+    inherit (pkgs) python3Packages openconnect;
+    inherit (pkgs.python3Packages) buildPythonApplication;
+    wrapQtAppsHook = pkgs.qt5.wrapQtAppsHook;
   };
 
   shell = pkgs.mkShell {
