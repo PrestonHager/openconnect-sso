@@ -1,7 +1,5 @@
 { sources ? import ./sources.nix
-, pkgs ? import <nixpkgs> {
-    overlays = [ (import "${sources.poetry2nix}/overlay.nix") ];
-  }
+, pkgs ? import <nixpkgs> {}
 }:
 
 let
@@ -16,7 +14,9 @@ let
   inherit (qtLibsFor pkgs.python3Packages.pyqt5) callPackage;
   pythonPackages = pkgs.python3Packages;
 
-  openconnect-sso = callPackage ./openconnect-sso.nix { inherit (pkgs) python3Packages; };
+  openconnect-sso = callPackage ./openconnect-sso.nix { 
+    inherit (pkgs) python3Packages poetry2nix; 
+  };
 
   shell = pkgs.mkShell {
     buildInputs = with pkgs; [

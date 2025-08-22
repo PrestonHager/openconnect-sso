@@ -7,12 +7,11 @@
     system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      overlay = import ./overlay.nix;
-      pkgsWithOverlay = pkgs.extend overlay;
+      openconnect-sso = (import ./nix { inherit pkgs; }).openconnect-sso;
     in
     {
-      packages = { inherit (pkgsWithOverlay) openconnect-sso; };
-      defaultPackage = pkgsWithOverlay.openconnect-sso;
+      packages = { inherit openconnect-sso; };
+      defaultPackage = openconnect-sso;
     }
   ) // {
       overlay = import ./overlay.nix;
