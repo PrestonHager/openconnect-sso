@@ -10,10 +10,27 @@
       openconnect-sso = (import ./nix { inherit pkgs; }).openconnect-sso;
     in
     {
-      packages = { inherit openconnect-sso; };
-      defaultPackage = openconnect-sso;
+      packages = { 
+        inherit openconnect-sso; 
+        default = openconnect-sso;
+      };
+      
+      # For nix run support
+      apps = {
+        openconnect-sso = {
+          type = "app";
+          program = "${openconnect-sso.out}/bin/openconnect-sso";
+        };
+        default = self.apps.${system}.openconnect-sso;
+      };
+      
+      # Development shell
+      devShells.default = (import ./nix { inherit pkgs; }).shell;
     }
   ) // {
-      overlay = import ./overlay.nix;
+      # NixOS overlay
+      overlays.default = import ./overlay.nix;
+      # Legacy support
+      overlay = self.overlays.default;
   });
 }

@@ -159,7 +159,7 @@ openconnect-sso --server vpn.server.com/group --user user@domain.com -- --base-m
 
 ## Development
 
-`openconnect-sso` is developed using [Nix](https://nixos.org/nix/). Refer to the
+`openconnect-sso` is developed using [Nix](https://nixos.org/nix/) and [UV](https://docs.astral.sh/uv/) for Python package management. Refer to the
 [Quick Start section of the Nix
 manual](https://nixos.org/nix/manual/#chap-quick-start) to see how to get it
 installed on your machine.
@@ -190,6 +190,6 @@ $ nix build
 $ result/bin/openconnect-sso --help
 ```
 
-Alternatively you may just [get Poetry](https://python-poetry.org/docs/) and
+Alternatively you may just [get UV](https://docs.astral.sh/uv/#installation) and
 start developing by using the included `Makefile`. Type `make help` to see the
 possible make targets.
