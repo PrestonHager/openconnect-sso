@@ -124,7 +124,7 @@ pre-commit: pre-commit-install
 
 .PHONY: test
 test:  ## Run tests
-	$(NIX_QTWRAPPER) $(VENV_BIN)/pytest
+	$(NIX_QTWRAPPER) $(VENV_BIN)/pytest --cov=openconnect_sso --cov-report=xml --cov-report=term
 
 ###############################################################################
 ## Release
