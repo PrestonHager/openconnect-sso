@@ -25,8 +25,8 @@ dependencies = [
     "toml>=0.10",
     "setuptools>40.0",
     "PySocks>=1.7.1",
-    "PyQt5>=5.15.0",
-    "PyQtWebEngine>=5.15.0",
+    "PyQt6>=6.2.0",
+    "PyQt6-WebEngine>=6.2.0",
     "pyotp>=2.7.0",
 ]
 

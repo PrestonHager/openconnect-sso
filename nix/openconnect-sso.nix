@@ -5,6 +5,7 @@
 , buildPythonApplication
 , substituteAll
 , wrapQtAppsHook
+, qtbase
 }:
 
 buildPythonApplication rec {
@@ -17,7 +18,7 @@ buildPythonApplication rec {
   nativeBuildInputs = with python3Packages; [
     setuptools
     wheel
-  ] ++ [ wrapQtAppsHook ];
+  ] ++ [ wrapQtAppsHook qtbase ];
 
   # Enable modern setuptools features for pyproject.toml support
   preBuild = ''
@@ -36,8 +37,8 @@ buildPythonApplication rec {
     toml
     setuptools
     pysocks
-    pyqt5
-    pyqtwebengine
+    pyqt6
+    pyqt6-webengine
     pyotp
   ]);
 

@@ -9,7 +9,7 @@ let
 
   openconnect-sso = pkgs.callPackage ./openconnect-sso.nix { 
     inherit (pkgs) python3Packages openconnect;
-    inherit (pkgs.qt5) wrapQtAppsHook;
+    inherit (pkgs.qt6Packages) wrapQtAppsHook qtbase;
     buildPythonApplication = pythonPackages.buildPythonApplication;
   };
 
@@ -56,7 +56,7 @@ let
       "\${qtWrapperArgs[@]}"
     ];
     unpackPhase = ":";
-    nativeBuildInputs = [ pkgs.qt5.wrapQtAppsHook ];
+    nativeBuildInputs = [ pkgs.qt6Packages.wrapQtAppsHook pkgs.qt6Packages.qtbase ];
     installPhase = ''
       mkdir -p $out/bin
       cat > $out/bin/wrap-qt <<'EOF'
