@@ -36,8 +36,8 @@ buildPythonApplication rec {
     toml
     setuptools
     pysocks
-    pyqt5
-    pyqtwebengine
+    pyqt6
+    pyqt6-webengine
     pyotp
   ]);
 
