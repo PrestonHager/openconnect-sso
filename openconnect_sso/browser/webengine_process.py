@@ -9,7 +9,18 @@ import attr
 try:
     from importlib.resources import files
 except ImportError:
-    from importlib_resources import files
+    # Fallback for Python < 3.9
+    import pkg_resources
+    def files(package):
+        class FilePath:
+            def __init__(self, pkg, path):
+                self.pkg = pkg
+                self.path = path
+            def __truediv__(self, other):
+                return FilePath(self.pkg, self.path + '/' + other)
+            def read_text(self):
+                return pkg_resources.resource_string(self.pkg, self.path).decode('utf-8')
+        return FilePath(package, '')
 import structlog
 
 from PyQt5.QtCore import QUrl, QTimer, pyqtSlot, Qt

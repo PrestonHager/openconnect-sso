@@ -50,9 +50,12 @@ Repository = "https://github.com/vlaci/openconnect-sso"
 [tool.setuptools.packages.find]
 include = ["openconnect_sso*"]
 
+[tool.setuptools.package-data]
+"openconnect_sso.browser" = ["*.js"]
+
 [tool.black]
 target-version = ['py36', 'py37', 'py38']
 
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
