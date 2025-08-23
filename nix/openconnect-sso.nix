@@ -12,7 +12,7 @@ buildPythonApplication rec {
   version = "0.8.1";
   format = "pyproject";
   
-  src = lib.cleanSource ../.;
+  src = lib.cleanSource ../.; 
 
   build-system = [
     python3Packages.setuptools
