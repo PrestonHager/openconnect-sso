@@ -100,9 +100,9 @@ dev:  ## Initializes repository for development
 	$(echo-stage) "Updating pip in .venv..."
 	$(VENV_BIN)/python -m pip install --upgrade pip
 	$(echo-stage) "Installing openconnect-sso in develop mode..."
-	(source $(VENV_BIN)/activate && poetry install $(POETRYARGS))
+	(source $(VENV_BIN)/activate && uv sync --dev)
 	$(echo-success) "Development installation finished."
-dev: POETRYARGS ?= ## Additional arguments for poetry install
+dev: UVARGS ?= ## Additional arguments for uv sync
 dev: PRECOMMIT ?= yes ## Install pre-commit hooks
 
 pre-commit-install:
@@ -132,7 +132,7 @@ VERSION = $(shell $(VENV_BIN)/python -c 'import openconnect_sso; print(f"v{openc
 
 .PHONY: dist
 dist:  ## Build packages from whatever state the repository is
-	poetry build
+	uv build
 	cp CHANGELOG.md dist/CHANGELOG-$(VERSION).md
 
 .PHONY: tag-repo

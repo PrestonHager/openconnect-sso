@@ -2,17 +2,37 @@
 , openconnect
 , python3
 , python3Packages
-, poetry2nix
 , substituteAll
 , wrapQtAppsHook
+, pkgs
 }:
 
-poetry2nix.mkPoetryApplication {
+let
+  sources = import ./sources.nix;
+  uv2nix = import sources.uv2nix { inherit pkgs; };
+  
+  workspace = uv2nix.lib.workspace.loadWorkspace {
+    workspaceRoot = lib.cleanSource ../.;
+  };
+  
+  overlay = workspace.mkPyprojectOverlay {
+    sourcePreference = "wheel";
+  };
+  
+  python = pkgs.python3.override {
+    packageOverrides = lib.composeManyExtensions [
+      overlay
+    ];
+  };
+  
+in python.pkgs.buildPythonApplication {
+  pname = "openconnect-sso";
+  version = "0.8.1";
+  
   src = lib.cleanSource ../.;
-  pyproject = ../pyproject.toml;
-  poetrylock = ../poetry.lock;
-  python = python3;
-  buildInputs = [ wrapQtAppsHook ];
+  format = "pyproject";
+  
+  nativeBuildInputs = [ wrapQtAppsHook ];
   propagatedBuildInputs = [ openconnect ];
 
   dontWrapQtApps = true;
@@ -20,14 +40,18 @@ poetry2nix.mkPoetryApplication {
     "\${qtWrapperArgs[@]}"
   ];
 
-  preferWheels = true;
+  # Override specific packages that need system versions
+  postPatch = ''
+    # Ensure we use system Qt packages
+  '';
 
-  overrides = [
-    poetry2nix.defaultPoetryOverrides
-    (
-      self: super: {
-        inherit (python3Packages) cryptography pyqt6 pyqt6-sip pyqt6-webengine six more-itertools;
-      }
-    )
-  ];
+  pythonImportsCheck = [ "openconnect_sso" ];
+
+  meta = with lib; {
+    description = "Wrapper script for OpenConnect supporting Azure AD (SAMLv2) authentication to Cisco SSL-VPNs";
+    homepage = "https://github.com/vlaci/openconnect-sso";
+    license = licenses.gpl3Only;
+    maintainers = [ ];
+    platforms = platforms.linux;
+  };
 }

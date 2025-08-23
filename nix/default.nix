@@ -1,10 +1,12 @@
 { sources ? import ./sources.nix
 , pkgs ? import <nixpkgs> {
-    overlays = [ (import "${sources.poetry2nix}/overlay.nix") ];
+    overlays = [ ];
   }
 }:
 
 let
+  uv2nixLib = import sources.uv2nix { inherit pkgs; };
+  
   qtLibsFor = with pkgs.lib; dep:
     let
       qtbase = head (filter (d: getName d.name == "qtbase") dep.nativeBuildInputs);
@@ -13,10 +15,13 @@ let
     in
     pkgs."libsForQt${majorMinor}";
 
-  inherit (qtLibsFor pkgs.python3Packages.pyqt5) callPackage;
+  inherit (qtLibsFor pkgs.python3Packages.pyqt6) callPackage;
   pythonPackages = pkgs.python3Packages;
 
-  openconnect-sso = callPackage ./openconnect-sso.nix { inherit (pkgs) python3Packages; };
+  openconnect-sso = callPackage ./openconnect-sso.nix { 
+    inherit (pkgs) python3Packages; 
+    pkgs = pkgs;
+  };
 
   shell = pkgs.mkShell {
     buildInputs = with pkgs; [
@@ -27,7 +32,7 @@ let
       which
       niv # Dependency manager for Nix expressions
       nixpkgs-fmt # To format Nix source files
-      poetry # Dependency manager for Python
+      uv # UV package manager for Python
     ] ++ (
       with pythonPackages; [
         pre-commit # To check coding style during commit
