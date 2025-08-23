@@ -2,7 +2,7 @@
 name = "openconnect-sso"
 version = "0.8.1"
 description = "Wrapper script for OpenConnect supporting Azure AD (SAMLv2) authentication to Cisco SSL-VPNs"
-license = {text = "GPL-3.0-only"}
+license = "GPL-3.0-only"
 authors = [{name = "László Vaskó", email = "laszlo.vasko@outlook.com"}]
 readme = "README.md"
 requires-python = ">=3.8"
