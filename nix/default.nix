@@ -1,7 +1,5 @@
 { sources ? import ./sources.nix
-, pkgs ? import <nixpkgs> {
-    overlays = [ (import "${sources.poetry2nix}/overlay.nix") ];
-  }
+, pkgs ? import <nixpkgs> {}
 }:
 
 let
@@ -16,10 +14,11 @@ let
   inherit (qtLibsFor pkgs.python3Packages.pyqt5) callPackage;
   pythonPackages = pkgs.python3Packages;
 
-  # Use poetry2nix approach - let callPackage auto-inject poetry2nix
-  # The overlay ensures poetry2nix is available in pkgs
-  openconnect-sso = callPackage ./openconnect-sso.nix { 
-    inherit (pkgs) python3Packages;
+  # Use standard Python derivation approach due to poetry2nix compatibility issues
+  # with current nixpkgs (pythonForBuild attribute missing)
+  openconnect-sso = callPackage ./openconnect-sso-standard.nix { 
+    inherit (pkgs) python3Packages openconnect;
+    inherit (pkgs.python3Packages) buildPythonApplication;
     wrapQtAppsHook = pkgs.qt5.wrapQtAppsHook;
   };
 

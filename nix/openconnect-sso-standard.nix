@@ -11,6 +11,9 @@ buildPythonApplication rec {
 
   src = lib.cleanSource ../.;
 
+  # Use setuptools format explicitly to avoid pyproject.toml poetry requirement
+  format = "setuptools";
+
   nativeBuildInputs = [ wrapQtAppsHook ];
   
   propagatedBuildInputs = with python3Packages; [
