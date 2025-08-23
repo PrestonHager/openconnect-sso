@@ -10,13 +10,13 @@
 buildPythonApplication rec {
   pname = "openconnect-sso";
   version = "0.8.1";
-  format = "pyproject";
+  pyproject = true;
   
   src = lib.cleanSource ../.; 
 
-  build-system = [
-    python3Packages.setuptools
-    python3Packages.wheel
+  build-system = with python3Packages; [
+    setuptools
+    wheel
   ];
 
   nativeBuildInputs = [ wrapQtAppsHook ];
