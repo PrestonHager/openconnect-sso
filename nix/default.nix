@@ -5,22 +5,12 @@
 }:
 
 let
-  uv2nixLib = import sources.uv2nix { inherit pkgs; };
-  
-  qtLibsFor = with pkgs.lib; dep:
-    let
-      qtbase = head (filter (d: getName d.name == "qtbase") dep.nativeBuildInputs);
-      version = splitVersion qtbase.version;
-      majorMinor = concatStrings (take 2 version);
-    in
-    pkgs."libsForQt${majorMinor}";
-
-  inherit (qtLibsFor pkgs.python3Packages.pyqt6) callPackage;
   pythonPackages = pkgs.python3Packages;
 
-  openconnect-sso = callPackage ./openconnect-sso.nix { 
-    inherit (pkgs) python3Packages; 
-    pkgs = pkgs;
+  openconnect-sso = pkgs.callPackage ./openconnect-sso.nix { 
+    inherit (pkgs) python3Packages openconnect;
+    inherit (pkgs.qt5) wrapQtAppsHook;
+    buildPythonApplication = pythonPackages.buildPythonApplication;
   };
 
   shell = pkgs.mkShell {
