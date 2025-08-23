@@ -32,15 +32,15 @@ except ImportError:
 
 import structlog
 
-from PyQt5.QtCore import QUrl, QTimer, pyqtSlot, Qt
-from PyQt5.QtNetwork import QNetworkCookie, QNetworkProxy
-from PyQt5.QtWebEngineWidgets import (
+from PyQt6.QtCore import QUrl, QTimer, pyqtSlot, Qt
+from PyQt6.QtNetwork import QNetworkCookie, QNetworkProxy
+from PyQt6.QtWebEngineCore import (
     QWebEngineScript,
     QWebEngineProfile,
     QWebEnginePage,
-    QWebEngineView,
 )
-from PyQt5.QtWidgets import QApplication, QWidget, QSizePolicy, QVBoxLayout
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWidgets import QApplication, QWidget, QSizePolicy, QVBoxLayout
 
 from openconnect_sso import config
 
