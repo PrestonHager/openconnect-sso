@@ -6,26 +6,40 @@ import sys
 from urllib.parse import urlparse
 
 import attr
+
 try:
     from importlib.resources import files
 except ImportError:
     # Fallback for Python < 3.9
     import pkg_resources
+
     def files(package):
         class FilePath:
             def __init__(self, pkg, path):
                 self.pkg = pkg
                 self.path = path
+
             def __truediv__(self, other):
-                return FilePath(self.pkg, self.path + '/' + other)
+                return FilePath(self.pkg, self.path + "/" + other)
+
             def read_text(self):
-                return pkg_resources.resource_string(self.pkg, self.path).decode('utf-8')
-        return FilePath(package, '')
+                return pkg_resources.resource_string(self.pkg, self.path).decode(
+                    "utf-8"
+                )
+
+        return FilePath(package, "")
+
+
 import structlog
 
 from PyQt5.QtCore import QUrl, QTimer, pyqtSlot, Qt
 from PyQt5.QtNetwork import QNetworkCookie, QNetworkProxy
-from PyQt5.QtWebEngineWidgets import QWebEngineScript, QWebEngineProfile, QWebEnginePage, QWebEngineView
+from PyQt5.QtWebEngineWidgets import (
+    QWebEngineScript,
+    QWebEngineProfile,
+    QWebEnginePage,
+    QWebEngineView,
+)
 from PyQt5.QtWidgets import QApplication, QWidget, QSizePolicy, QVBoxLayout
 
 from openconnect_sso import config

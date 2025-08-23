@@ -120,14 +120,10 @@ let
       fetchurl attrs;
 
 in
-mapAttrs
-  (
-    name: spec:
-      if builtins.hasAttr "outPath" spec
-      then
-        abort
-          "The values in sources.json should not have an 'outPath' attribute"
-      else
-        spec // { outPath = fetch name spec; }
-  )
-  sources
+mapAttrs (
+  name: spec:
+  if builtins.hasAttr "outPath" spec then
+    abort "The values in sources.json should not have an 'outPath' attribute"
+  else
+    spec // { outPath = fetch name spec; }
+) sources

@@ -26,7 +26,7 @@ jobs:
       - name: Build with traditional Nix
         if: matrix.nix-type == 'default'
         run: |
-          nix-build -A openconnect-sso
+          nix-build
           
       - name: Build with Nix flakes
         if: matrix.nix-type == 'flake'
