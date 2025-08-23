@@ -4,7 +4,7 @@
 , python3Packages
 , poetry2nix
 , substituteAll
-, wrapQtAppsHook
+, qt5
 }:
 
 poetry2nix.mkPoetryApplication {
@@ -12,7 +12,8 @@ poetry2nix.mkPoetryApplication {
   pyproject = ../pyproject.toml;
   poetrylock = ../poetry.lock;
   python = python3;
-  nativeBuildInputs = [ wrapQtAppsHook ];
+  # Ensure poetry-core is available for the build along with Qt wrapper
+  nativeBuildInputs = [ qt5.wrapQtAppsHook python3Packages.poetry-core ];
   propagatedBuildInputs = [ openconnect ];
 
   dontWrapQtApps = true;
@@ -21,6 +22,9 @@ poetry2nix.mkPoetryApplication {
   ];
 
   preferWheels = false;  # Don't try to fetch wheels from internet
+
+  # Skip dev dependencies to avoid problematic packages like coverage_enable_subprocess
+  groups = [ ];  # This excludes dev dependencies
 
   overrides = [
     poetry2nix.defaultPoetryOverrides
@@ -31,6 +35,9 @@ poetry2nix.mkPoetryApplication {
           cryptography pyqt6 pyqt6-sip pyqt6-webengine six more-itertools
           requests urllib3 certifi idna charset-normalizer
           pysocks setuptools wheel;
+        
+        # Skip problematic dev-only packages
+        coverage-enable-subprocess = null;
       }
     )
   ];

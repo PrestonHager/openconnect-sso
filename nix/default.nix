@@ -3,27 +3,28 @@
 }:
 
 let
-  qtLibsFor = with pkgs.lib; dep:
+  # Ensure poetry2nix is available by applying the overlay
+  poetry2nixOverlay = import "${sources.poetry2nix}/overlay.nix";
+  pkgsWithPoetry2nix = pkgs.extend poetry2nixOverlay;
+
+  qtLibsFor = with pkgsWithPoetry2nix.lib; dep:
     let
       qtbase = head (filter (d: getName d.name == "qtbase") dep.nativeBuildInputs);
       version = splitVersion qtbase.version;
       majorMinor = concatStrings (take 2 version);
     in
-    pkgs."libsForQt${majorMinor}";
+    pkgsWithPoetry2nix."libsForQt${majorMinor}";
 
-  inherit (qtLibsFor pkgs.python3Packages.pyqt5) callPackage;
-  pythonPackages = pkgs.python3Packages;
+  inherit (qtLibsFor pkgsWithPoetry2nix.python3Packages.pyqt5) callPackage;
+  pythonPackages = pkgsWithPoetry2nix.python3Packages;
 
-  # Use standard Python derivation approach due to poetry2nix compatibility issues
-  # with current nixpkgs (pythonForBuild attribute missing)
-  openconnect-sso = callPackage ./openconnect-sso-standard.nix { 
-    inherit (pkgs) python3Packages openconnect;
-    inherit (pkgs.python3Packages) buildPythonApplication;
-    wrapQtAppsHook = pkgs.qt5.wrapQtAppsHook;
+  # Use poetry2nix approach with proper error handling
+  openconnect-sso = callPackage ./openconnect-sso.nix {
+    inherit (pkgsWithPoetry2nix) python3Packages poetry2nix qt5;
   };
 
-  shell = pkgs.mkShell {
-    buildInputs = with pkgs; [
+  shell = pkgsWithPoetry2nix.mkShell {
+    buildInputs = with pkgsWithPoetry2nix; [
       # For Makefile
       gawk
       git
@@ -54,16 +55,16 @@ let
     '';
   };
 
-  niv = if pkgs ? niv then pkgs.nim else pkgs.haskellPackages.niv;
+  niv = if pkgsWithPoetry2nix ? niv then pkgsWithPoetry2nix.nim else pkgsWithPoetry2nix.haskellPackages.niv;
 
-  qtwrapper = pkgs.stdenv.mkDerivation {
+  qtwrapper = pkgsWithPoetry2nix.stdenv.mkDerivation {
     name = "qtwrapper";
     dontWrapQtApps = true;
     makeWrapperArgs = [
       "\${qtWrapperArgs[@]}"
     ];
     unpackPhase = ":";
-    nativeBuildInputs = [ pkgs.qt5.wrapQtAppsHook ];
+    nativeBuildInputs = [ pkgsWithPoetry2nix.qt5.wrapQtAppsHook ];
     installPhase = ''
       mkdir -p $out/bin
       cat > $out/bin/wrap-qt <<'EOF'
