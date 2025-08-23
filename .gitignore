@@ -109,3 +109,6 @@ venv.bak/
 
 # pre-commit
 .pre-commit-cache
+
+# Nix related files
+result
