@@ -12,7 +12,7 @@ poetry2nix.mkPoetryApplication {
   pyproject = ../pyproject.toml;
   poetrylock = ../poetry.lock;
   python = python3;
-  buildInputs = [ wrapQtAppsHook ];
+  nativeBuildInputs = [ wrapQtAppsHook ];
   propagatedBuildInputs = [ openconnect ];
 
   dontWrapQtApps = true;
@@ -20,13 +20,17 @@ poetry2nix.mkPoetryApplication {
     "\${qtWrapperArgs[@]}"
   ];
 
-  preferWheels = true;
+  preferWheels = false;  # Don't try to fetch wheels from internet
 
   overrides = [
     poetry2nix.defaultPoetryOverrides
     (
       self: super: {
-        inherit (python3Packages) cryptography pyqt6 pyqt6-sip pyqt6-webengine six more-itertools;
+        # Use nixpkgs versions for all dependencies to avoid fetching issues
+        inherit (python3Packages) 
+          cryptography pyqt6 pyqt6-sip pyqt6-webengine six more-itertools
+          requests urllib3 certifi idna charset-normalizer
+          pysocks setuptools wheel;
       }
     )
   ];
