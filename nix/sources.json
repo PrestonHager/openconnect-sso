@@ -11,16 +11,16 @@
         "url": "https://github.com/nmattia/niv/archive/351d8bc316bf901a81885bab5f52687ec8ccab6e.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
-    "poetry2nix": {
-        "branch": "1.41.0",
-        "description": "Convert poetry projects to nix automagically [maintainer=@adisbladis] ",
-        "homepage": "",
-        "owner": "nix-community",
-        "repo": "poetry2nix",
-        "rev": "585f19cce38a7f75d5bc567b17060ec45bc63ed0",
-        "sha256": "0dj2a1wzcyilrc9fmfffx6d3bgq7zpawjadd7rphkkq8imh18y6a",
+    "uv2nix": {
+        "branch": "main",
+        "description": "Convert uv projects to nix automagically",
+        "homepage": "https://github.com/pyproject-nix/uv2nix",
+        "owner": "pyproject-nix",
+        "repo": "uv2nix",
+        "rev": "eb8b294bb30b08dceba83fde7c67a8b7a91f6a03",
+        "sha256": "1000000000000000000000000000000000000000000000000000",
         "type": "tarball",
-        "url": "https://github.com/nix-community/poetry2nix/archive/585f19cce38a7f75d5bc567b17060ec45bc63ed0.tar.gz",
+        "url": "https://github.com/pyproject-nix/uv2nix/archive/eb8b294bb30b08dceba83fde7c67a8b7a91f6a03.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

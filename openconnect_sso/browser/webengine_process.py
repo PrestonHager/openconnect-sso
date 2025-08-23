@@ -6,14 +6,27 @@ import sys
 from urllib.parse import urlparse
 
 import attr
-import pkg_resources
+try:
+    from importlib.resources import files
+except ImportError:
+    # Fallback for Python < 3.9
+    import pkg_resources
+    def files(package):
+        class FilePath:
+            def __init__(self, pkg, path):
+                self.pkg = pkg
+                self.path = path
+            def __truediv__(self, other):
+                return FilePath(self.pkg, self.path + '/' + other)
+            def read_text(self):
+                return pkg_resources.resource_string(self.pkg, self.path).decode('utf-8')
+        return FilePath(package, '')
 import structlog
 
-from PyQt6.QtCore import QUrl, QTimer, pyqtSlot, Qt
-from PyQt6.QtNetwork import QNetworkCookie, QNetworkProxy
-from PyQt6.QtWebEngineCore import QWebEngineScript, QWebEngineProfile, QWebEnginePage
-from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtWidgets import QApplication, QWidget, QSizePolicy, QVBoxLayout
+from PyQt5.QtCore import QUrl, QTimer, pyqtSlot, Qt
+from PyQt5.QtNetwork import QNetworkCookie, QNetworkProxy
+from PyQt5.QtWebEngineWidgets import QWebEngineScript, QWebEngineProfile, QWebEnginePage, QWebEngineView
+from PyQt5.QtWidgets import QApplication, QWidget, QSizePolicy, QVBoxLayout
 
 from openconnect_sso import config
 
@@ -158,7 +171,7 @@ class WebBrowser(QWebEngineView):
             return self._popupWindow.view()
 
     def authenticate_at(self, url, credentials):
-        script_source = pkg_resources.resource_string(__name__, "user.js").decode()
+        script_source = (files(__package__) / "user.js").read_text()
         script = QWebEngineScript()
         script.setInjectionPoint(QWebEngineScript.InjectionPoint.DocumentCreation)
         script.setWorldId(QWebEngineScript.ScriptWorldId.ApplicationWorld)

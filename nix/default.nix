@@ -1,22 +1,17 @@
 { sources ? import ./sources.nix
 , pkgs ? import <nixpkgs> {
-    overlays = [ (import "${sources.poetry2nix}/overlay.nix") ];
+    overlays = [ ];
   }
 }:
 
 let
-  qtLibsFor = with pkgs.lib; dep:
-    let
-      qtbase = head (filter (d: getName d.name == "qtbase") dep.nativeBuildInputs);
-      version = splitVersion qtbase.version;
-      majorMinor = concatStrings (take 2 version);
-    in
-    pkgs."libsForQt${majorMinor}";
-
-  inherit (qtLibsFor pkgs.python3Packages.pyqt5) callPackage;
   pythonPackages = pkgs.python3Packages;
 
-  openconnect-sso = callPackage ./openconnect-sso.nix { inherit (pkgs) python3Packages; };
+  openconnect-sso = pkgs.callPackage ./openconnect-sso.nix { 
+    inherit (pkgs) python3Packages openconnect;
+    inherit (pkgs.qt5) wrapQtAppsHook;
+    buildPythonApplication = pythonPackages.buildPythonApplication;
+  };
 
   shell = pkgs.mkShell {
     buildInputs = with pkgs; [
@@ -27,10 +22,12 @@ let
       which
       niv # Dependency manager for Nix expressions
       nixpkgs-fmt # To format Nix source files
-      poetry # Dependency manager for Python
+      # Note: UV package manager is not yet available in stable nixpkgs
+      # Users can install it separately: curl -LsSf https://astral.sh/uv/install.sh | sh
     ] ++ (
       with pythonPackages; [
         pre-commit # To check coding style during commit
+        pytest # For running tests
       ]
     ) ++ (
       # only install those dependencies in the shell env which are meant to be
