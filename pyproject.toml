@@ -49,13 +49,6 @@ Repository = "https://github.com/vlaci/openconnect-sso"
 [tool.setuptools.packages.find]
 include = ["openconnect_sso*"]
 
-[tool.poetry.group.dev.dependencies]
-coverage_enable_subprocess = "^1.0"
-pytest = "^8.0"
-black = "=24.10.0"
-pytest-asyncio = "^0.24.0"
-pytest-cov = "^6.0"
-pytest-httpserver = "^1.1"
 
 [tool.setuptools.package-data]
 "openconnect_sso.browser" = ["*.js"]

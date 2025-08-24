@@ -34,11 +34,7 @@ import structlog
 
 from PyQt6.QtCore import QUrl, QTimer, pyqtSlot, Qt
 from PyQt6.QtNetwork import QNetworkCookie, QNetworkProxy
-from PyQt6.QtWebEngineCore import (
-    QWebEngineScript,
-    QWebEngineProfile,
-    QWebEnginePage,
-)
+from PyQt6.QtWebEngineCore import QWebEngineScript, QWebEngineProfile, QWebEnginePage
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QApplication, QWidget, QSizePolicy, QVBoxLayout
 
@@ -106,15 +102,47 @@ class Process(multiprocessing.Process):
         argv = sys.argv.copy()
         if self.display_mode == config.DisplayMode.HIDDEN:
             argv += ["-platform", "minimal"]
+        else:
+            # Add platform-specific Qt arguments for better X11/Wayland compatibility
+            import os
+            # Set Qt platform plugin based on environment if not already set
+            if not os.environ.get('QT_QPA_PLATFORM'):
+                # For X11 environments, ensure we use the xcb platform
+                if os.environ.get('DISPLAY'):
+                    os.environ['QT_QPA_PLATFORM'] = 'xcb'
+                # For Wayland environments with fallback to X11
+                elif os.environ.get('WAYLAND_DISPLAY'):
+                    # Try Wayland first, but Qt will fallback to xcb if needed
+                    if not os.environ.get('QT_QPA_PLATFORM'):
+                        os.environ['QT_QPA_PLATFORM'] = 'wayland;xcb'
+            
+            # Set Qt scale factor mode for better high-DPI support
+            if not os.environ.get('QT_SCALE_FACTOR_ROUNDING_POLICY'):
+                os.environ['QT_SCALE_FACTOR_ROUNDING_POLICY'] = 'PassThrough'
+        
         app = QApplication(argv)
+        
+        # Configure WebEngine settings for better compatibility
+        try:
+            from PyQt6.QtWebEngineCore import QWebEngineSettings
+            # Disable hardware acceleration if GLX issues occur
+            settings = QWebEngineSettings.globalSettings()
+            settings.setAttribute(QWebEngineSettings.WebAttribute.Accelerated2dCanvasEnabled, False)
+            settings.setAttribute(QWebEngineSettings.WebAttribute.WebGLEnabled, False)
+        except ImportError:
+            # Fallback if QWebEngineSettings is not available
+            logger.warning("Could not configure WebEngine settings - some graphics features may not work")
+        except Exception as e:
+            logger.warning("Failed to configure WebEngine settings", error=str(e))
+        
         profile = QWebEngineProfile("openconnect-sso")
 
         if self.proxy:
             parsed = urlparse(self.proxy)
             if parsed.scheme.startswith("socks5"):
-                proxy_type = QNetworkProxy.Socks5Proxy
+                proxy_type = QNetworkProxy.ProxyType.Socks5Proxy
             elif parsed.scheme.startswith("http"):
-                proxy_type = QNetworkProxy.HttpProxy
+                proxy_type = QNetworkProxy.ProxyType.HttpProxy
             else:
                 raise ValueError("Unsupported proxy type", parsed.scheme)
             proxy = QNetworkProxy(proxy_type, parsed.hostname, parsed.port)
@@ -180,7 +208,7 @@ class WebBrowser(QWebEngineView):
         self.page().loadFinished.connect(self._on_load_finished)
 
     def createWindow(self, type):
-        if type == QWebEnginePage.WebDialog:
+        if type == QWebEnginePage.WebWindowType.WebDialog:
             self._popupWindow = WebPopupWindow(self.page().profile())
             return self._popupWindow.view()
 
@@ -232,7 +260,7 @@ class WebPopupWindow(QWidget):
         self._view = QWebEngineView(self)
 
         super().setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
-        super().setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        super().setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         layout = QVBoxLayout()
         super().setLayout(layout)
