@@ -1,5 +1,13 @@
-{ lib, openconnect, python3, python3Packages, buildPythonApplication
-, substituteAll, wrapQtAppsHook, qtbase }:
+{
+  lib,
+  openconnect,
+  python3,
+  python3Packages,
+  buildPythonApplication,
+  substituteAll,
+  wrapQtAppsHook,
+  qtbase,
+}:
 
 buildPythonApplication rec {
   pname = "openconnect-sso";
@@ -8,15 +16,26 @@ buildPythonApplication rec {
 
   src = lib.cleanSource ../.;
 
-  nativeBuildInputs = with python3Packages;
-    [ setuptools wheel ] ++ [ wrapQtAppsHook qtbase ];
+  nativeBuildInputs =
+    with python3Packages;
+    [
+      setuptools
+      wheel
+    ]
+    ++ [
+      wrapQtAppsHook
+      qtbase
+    ];
 
   # Enable modern setuptools features for pyproject.toml support
   preBuild = ''
     export SETUPTOOLS_SCM_PRETEND_VERSION=${version}
   '';
 
-  propagatedBuildInputs = [ openconnect ] ++ (with python3Packages; [
+  propagatedBuildInputs = [
+    openconnect
+  ]
+  ++ (with python3Packages; [
     attrs
     colorama
     lxml
@@ -42,8 +61,7 @@ buildPythonApplication rec {
   doCheck = false;
 
   meta = with lib; {
-    description =
-      "Wrapper script for OpenConnect supporting Azure AD (SAMLv2) authentication to Cisco SSL-VPNs";
+    description = "Wrapper script for OpenConnect supporting Azure AD (SAMLv2) authentication to Cisco SSL-VPNs";
     homepage = "https://github.com/vlaci/openconnect-sso";
     license = licenses.gpl3Only;
     maintainers = [ ];

@@ -185,7 +185,6 @@ class Process(multiprocessing.Process):
 
 
 def on_sigterm(signum, frame):
-    global profile
     logger.info("Terminate requested.")
     # Force flush cookieStore to disk. Without this hack the cookieStore may
     # not be synced at all if the browser lives only for a short amount of

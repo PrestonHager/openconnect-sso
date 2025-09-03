@@ -6,25 +6,29 @@ let
   # The fetchers. fetch_<type> fetches specs of type <type>.
   #
 
-  fetch_file = spec:
+  fetch_file =
+    spec:
     if spec.builtin or true then
       builtins_fetchurl { inherit (spec) url sha256; }
     else
       pkgs.fetchurl { inherit (spec) url sha256; };
 
-  fetch_tarball = spec:
+  fetch_tarball =
+    spec:
     if spec.builtin or true then
       builtins_fetchTarball { inherit (spec) url sha256; }
     else
       pkgs.fetchzip { inherit (spec) url sha256; };
 
-  fetch_git = spec:
+  fetch_git =
+    spec:
     builtins.fetchGit {
       url = spec.repo;
       inherit (spec) rev ref;
     };
 
-  fetch_builtin-tarball = spec:
+  fetch_builtin-tarball =
+    spec:
     builtins.trace ''
       WARNING:
         The niv type "builtin-tarball" will soon be deprecated. You should
@@ -33,14 +37,19 @@ let
         $ niv modify <package> -a type=tarball -a builtin=true
     '' builtins_fetchTarball { inherit (spec) url sha256; };
 
-  fetch_builtin-url = spec:
-    builtins.trace ''
-      WARNING:
-        The niv type "builtin-url" will soon be deprecated. You should
-        instead use `builtin = true`.
+  fetch_builtin-url =
+    spec:
+    builtins.trace
+      ''
+        WARNING:
+          The niv type "builtin-url" will soon be deprecated. You should
+          instead use `builtin = true`.
 
-        $ niv modify <package> -a type=file -a builtin=true
-    '' (builtins_fetchurl { inherit (spec) url sha256; });
+          $ niv modify <package> -a type=file -a builtin=true
+      ''
+      (builtins_fetchurl {
+        inherit (spec) url sha256;
+      });
 
   #
   # The sources to fetch.
@@ -53,23 +62,23 @@ let
   #
 
   # The set of packages used when specs are fetched using non-builtins.
-  pkgs = if hasNixpkgsPath then
-    if hasThisAsNixpkgsPath then
-      import (builtins_fetchTarball { inherit (sources_nixpkgs) url sha256; })
-      { }
+  pkgs =
+    if hasNixpkgsPath then
+      if hasThisAsNixpkgsPath then
+        import (builtins_fetchTarball { inherit (sources_nixpkgs) url sha256; }) { }
+      else
+        import <nixpkgs> { }
     else
-      import <nixpkgs> { }
-  else
-    import (builtins_fetchTarball { inherit (sources_nixpkgs) url sha256; })
-    { };
+      import (builtins_fetchTarball { inherit (sources_nixpkgs) url sha256; }) { };
 
-  sources_nixpkgs = if builtins.hasAttr "nixpkgs" sources then
-    sources.nixpkgs
-  else
-    abort ''
-      Please specify either <nixpkgs> (through -I or NIX_PATH=nixpkgs=...) or
-      add a package called "nixpkgs" to your sources.json.
-    '';
+  sources_nixpkgs =
+    if builtins.hasAttr "nixpkgs" sources then
+      sources.nixpkgs
+    else
+      abort ''
+        Please specify either <nixpkgs> (through -I or NIX_PATH=nixpkgs=...) or
+        add a package called "nixpkgs" to your sources.json.
+      '';
 
   hasNixpkgsPath = (builtins.tryEval <nixpkgs>).success;
   hasThisAsNixpkgsPath = (builtins.tryEval <nixpkgs>).success && <nixpkgs> == ./.;
