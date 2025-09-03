@@ -8,7 +8,93 @@ to Cisco SSL-VPNs
 
 ## Installation
 
-### Using pip/pipx
+> **Note**: This repository (`PrestonHager/openconnect-sso`) is a fork and does not publish to any package indexes like PyPI. Use one of the installation methods below specific to this repository.
+
+### Using nix flakes *(Recommended)*
+
+If you have [Nix](https://nixos.org/nix/) with flakes enabled, you can run `openconnect-sso` directly without installing:
+
+```shell
+$ nix run github:PrestonHager/openconnect-sso -- --help
+```
+
+To install permanently:
+
+```shell
+$ nix profile install github:PrestonHager/openconnect-sso
+$ openconnect-sso --help
+```
+
+### Using nix (traditional)
+
+The easiest method to try is by installing directly:
+
+```shell
+$ nix-env -i -f https://github.com/PrestonHager/openconnect-sso/archive/main.tar.gz
+unpacking 'https://github.com/PrestonHager/openconnect-sso/archive/main.tar.gz'...
+[...]
+installing 'openconnect-sso-0.8.1'
+[...]
+$ openconnect-sso
+```
+
+An overlay is also available to use in nix expressions:
+
+``` nix
+let
+  openconnectOverlay = import "${builtins.fetchTarball https://github.com/PrestonHager/openconnect-sso/archive/main.tar.gz}/overlay.nix";
+  pkgs = import <nixpkgs> { overlays = [ openconnectOverlay ]; };
+in
+  #  pkgs.openconnect-sso is available in this context
+```
+
+... or to use in `configuration.nix`:
+
+``` nix
+{ config, ... }:
+
+{
+  nixpkgs.overlays = [
+    (import "${builtins.fetchTarball https://github.com/PrestonHager/openconnect-sso/archive/main.tar.gz}/overlay.nix")
+  ];
+}
+```
+
+### From GitHub Releases
+
+Download the latest release from [GitHub Releases](https://github.com/PrestonHager/openconnect-sso/releases) and install with pip:
+
+```shell
+# Download the wheel file from the latest release
+$ pip install openconnect_sso-*.whl
+
+# Or install directly from GitHub release URL
+$ pip install https://github.com/PrestonHager/openconnect-sso/releases/latest/download/openconnect_sso-0.8.1-py3-none-any.whl
+```
+
+### Building from Source
+
+Clone this repository and build from source using [UV](https://docs.astral.sh/uv/):
+
+```shell
+$ git clone https://github.com/PrestonHager/openconnect-sso.git
+$ cd openconnect-sso
+$ uv build
+$ pip install dist/openconnect_sso-*.whl
+```
+
+Or use the included Makefile:
+
+```shell
+$ git clone https://github.com/PrestonHager/openconnect-sso.git
+$ cd openconnect-sso
+$ make dist
+$ pip install dist/openconnect_sso-*.whl
+```
+
+### Using pip/pipx *(Original Repository)*
+
+> **Note**: This installs the original `vlaci/openconnect-sso` package, not this fork.
 
 A generic way that works on most 'standard' Linux distributions out of the box.
 The following example shows how to install `openconect-sso` along with its
@@ -40,7 +126,9 @@ effect. ✨ 🌟 ✨
 Of course you can also install via `pip` instead of `pipx` if you'd like to
 install system-wide or a virtualenv of your choice.
 
-### On Arch Linux
+### On Arch Linux *(Original Repository)*
+
+> **Note**: This installs the original `vlaci/openconnect-sso` package, not this fork.
 
 There is an unofficial package available for Arch Linux on
 [AUR](https://aur.archlinux.org/packages/openconnect-sso/). You can use your
@@ -50,48 +138,9 @@ favorite AUR helper to install it:
 yay -S openconnect-sso
 ```
 
-### Using nix
-
-The easiest method to try is by installing directly:
-
-```shell
-$ nix-env -i -f https://github.com/vlaci/openconnect-sso/archive/master.tar.gz
-unpacking 'https://github.com/vlaci/openconnect-sso/archive/master.tar.gz'...
-[...]
-installing 'openconnect-sso-0.4.0'
-these derivations will be built:
-  /nix/store/2z47740z1rr2cfqfin5lnq04sq3c5xjg-openconnect-sso-0.4.0.drv
-[...]
-building '/nix/store/50q496iqf840wi8b95cfmgn07k6y5b59-user-environment.drv'...
-created 606 symlinks in user environment
-$ openconnect-sso
-```
-
-An overlay is also available to use in nix expressions:
-
-``` nix
-let
-  openconnectOverlay = import "${builtins.fetchTarball https://github.com/vlaci/openconnect-sso/archive/master.tar.gz}/overlay.nix";
-  pkgs = import <nixpkgs> { overlays = [ openconnectOverlay ]; };
-in
-  #  pkgs.openconnect-sso is available in this context
-```
-
-... or to use in `configuration.nix`:
-
-``` nix
-{ config, ... }:
-
-{
-  nixpkgs.overlays = [
-    (import "${builtins.fetchTarball https://github.com/vlaci/openconnect-sso/archive/master.tar.gz}/overlay.nix")
-  ];
-}
-```
-
 ### Windows *(EXPERIMENTAL)*
 
-Install with [pip/pipx](#using-pippipx) and be sure that you have `sudo` and `openconnect`
+Building from source should work on Windows. Install with the building from source method above and be sure that you have `sudo` and `openconnect`
 executable commands in your PATH.
 
 ## Usage
@@ -181,10 +230,10 @@ Run 'make help' for available commands
 [nix-shell]$
 ```
 
-To try an installed version of the package, issue `nix-build`:
+To try an installed version of the package, issue `nix build`:
 
 ```shell
-$ nix build
+$ nix build github:PrestonHager/openconnect-sso
 [1 built, 0.0 MiB DL]
 
 $ result/bin/openconnect-sso --help
