@@ -7,7 +7,7 @@
 let
   pythonPackages = pkgs.python3Packages;
 
-  openconnect-sso = pkgs.callPackage ./openconnect-sso.nix { 
+  openconnect-sso = pkgs.callPackage ./openconnect-sso.nix {
     inherit (pkgs) python3Packages openconnect;
     inherit (pkgs.qt6Packages) wrapQtAppsHook qtbase;
     buildPythonApplication = pythonPackages.buildPythonApplication;
@@ -22,8 +22,7 @@ let
       which
       niv # Dependency manager for Nix expressions
       nixpkgs-fmt # To format Nix source files
-      # Note: UV package manager is not yet available in stable nixpkgs
-      # Users can install it separately: curl -LsSf https://astral.sh/uv/install.sh | sh
+      uv
     ] ++ (
       with pythonPackages; [
         pre-commit # To check coding style during commit
