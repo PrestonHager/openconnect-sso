@@ -112,7 +112,7 @@ dev: PRECOMMIT ?= yes ## Install pre-commit hooks
 
 pre-commit-install:
 	@$(echo-stage) "Setting up pre-commit hooks..."
-	pre-commit install --install-hooks
+	pre-commit install-hooks
 
 .PHONY: clean
 clean:  ## Remove temporary files and artifacts

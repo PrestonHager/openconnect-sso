@@ -1,4 +1,7 @@
-{ sources ? import ./sources.nix, pkgs ? import <nixpkgs> { overlays = [ ]; } }:
+{
+  sources ? import ./sources.nix,
+  pkgs ? import <nixpkgs> { overlays = [ ]; },
+}:
 
 let
   pythonPackages = pkgs.python3Packages;
@@ -10,7 +13,8 @@ let
   };
 
   shell = pkgs.mkShell {
-    buildInputs = with pkgs;
+    buildInputs =
+      with pkgs;
       [
         # For Makefile
         gawk
@@ -18,17 +22,22 @@ let
         gnumake
         which
         niv # Dependency manager for Nix expressions
-        nixpkgs-fmt # To format Nix source files
+        nixfmt-rfc-style # To format Nix source files
         uv
-      ] ++ (with pythonPackages; [
+        cabal-install # To use pre-commit hooks on Haskell tools like nixfmt
+        ghc
+      ]
+      ++ (with pythonPackages; [
         pre-commit # To check coding style during commit
         pytest # For running tests
-      ]) ++ (
+      ])
+      ++ (
         # only install those dependencies in the shell env which are meant to be
         # visible in the environment after installation of the actual package.
         # Specifying `inputsFrom = [ openconnect-sso ]` introduces weird errors as
         # it brings transitive dependencies into scope.
-        openconnect-sso.propagatedBuildInputs);
+        openconnect-sso.propagatedBuildInputs
+      );
     shellHook = ''
       # Python wheels are ZIP files which cannot contain timestamps prior to
       # 1980
@@ -47,8 +56,10 @@ let
     dontWrapQtApps = true;
     makeWrapperArgs = [ "\${qtWrapperArgs[@]}" ];
     unpackPhase = ":";
-    nativeBuildInputs =
-      [ pkgs.qt6Packages.wrapQtAppsHook pkgs.qt6Packages.qtbase ];
+    nativeBuildInputs = [
+      pkgs.qt6Packages.wrapQtAppsHook
+      pkgs.qt6Packages.qtbase
+    ];
     installPhase = ''
       mkdir -p $out/bin
       cat > $out/bin/wrap-qt <<'EOF'
@@ -59,4 +70,7 @@ let
       wrapQtApp $out/bin/wrap-qt
     '';
   };
-in { inherit openconnect-sso shell; }
+in
+{
+  inherit openconnect-sso shell;
+}
