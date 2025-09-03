@@ -164,7 +164,7 @@ before-release:
 		git status
 		$(error-exit) "Repository is dirty!"
 	fi
-	if [[ $$(git rev-parse HEAD) != $$(git rev-parse origin/master) ]]; then
-		git --no-pager log --oneline --graph origin/master...
-		$(error-exit) "HEAD must point to origin/master!"
+	if [[ $$(git rev-parse HEAD) != $$(git rev-parse origin/main) ]]; then
+		git --no-pager log --oneline --graph origin/main...
+		$(error-exit) "HEAD must point to origin/main!"
 	fi
