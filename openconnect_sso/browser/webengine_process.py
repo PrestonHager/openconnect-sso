@@ -6,21 +6,30 @@ import sys
 from urllib.parse import urlparse
 
 import attr
+
 try:
     from importlib.resources import files
 except ImportError:
     # Fallback for Python < 3.9
     import pkg_resources
+
     def files(package):
         class FilePath:
             def __init__(self, pkg, path):
                 self.pkg = pkg
                 self.path = path
+
             def __truediv__(self, other):
-                return FilePath(self.pkg, self.path + '/' + other)
+                return FilePath(self.pkg, self.path + "/" + other)
+
             def read_text(self):
-                return pkg_resources.resource_string(self.pkg, self.path).decode('utf-8')
-        return FilePath(package, '')
+                return pkg_resources.resource_string(self.pkg, self.path).decode(
+                    "utf-8"
+                )
+
+        return FilePath(package, "")
+
+
 import structlog
 
 from PyQt6.QtCore import QUrl, QTimer, pyqtSlot, Qt
@@ -96,36 +105,42 @@ class Process(multiprocessing.Process):
         else:
             # Add platform-specific Qt arguments for better X11/Wayland compatibility
             import os
+
             # Set Qt platform plugin based on environment if not already set
-            if not os.environ.get('QT_QPA_PLATFORM'):
+            if not os.environ.get("QT_QPA_PLATFORM"):
                 # For X11 environments, ensure we use the xcb platform
-                if os.environ.get('DISPLAY'):
-                    os.environ['QT_QPA_PLATFORM'] = 'xcb'
+                if os.environ.get("DISPLAY"):
+                    os.environ["QT_QPA_PLATFORM"] = "xcb"
                 # For Wayland environments with fallback to X11
-                elif os.environ.get('WAYLAND_DISPLAY'):
+                elif os.environ.get("WAYLAND_DISPLAY"):
                     # Try Wayland first, but Qt will fallback to xcb if needed
-                    if not os.environ.get('QT_QPA_PLATFORM'):
-                        os.environ['QT_QPA_PLATFORM'] = 'wayland;xcb'
-            
+                    if not os.environ.get("QT_QPA_PLATFORM"):
+                        os.environ["QT_QPA_PLATFORM"] = "wayland;xcb"
+
             # Set Qt scale factor mode for better high-DPI support
-            if not os.environ.get('QT_SCALE_FACTOR_ROUNDING_POLICY'):
-                os.environ['QT_SCALE_FACTOR_ROUNDING_POLICY'] = 'PassThrough'
-        
+            if not os.environ.get("QT_SCALE_FACTOR_ROUNDING_POLICY"):
+                os.environ["QT_SCALE_FACTOR_ROUNDING_POLICY"] = "PassThrough"
+
         app = QApplication(argv)
-        
+
         # Configure WebEngine settings for better compatibility
         try:
             from PyQt6.QtWebEngineCore import QWebEngineSettings
+
             # Disable hardware acceleration if GLX issues occur
             settings = QWebEngineSettings.globalSettings()
-            settings.setAttribute(QWebEngineSettings.WebAttribute.Accelerated2dCanvasEnabled, False)
+            settings.setAttribute(
+                QWebEngineSettings.WebAttribute.Accelerated2dCanvasEnabled, False
+            )
             settings.setAttribute(QWebEngineSettings.WebAttribute.WebGLEnabled, False)
         except ImportError:
             # Fallback if QWebEngineSettings is not available
-            logger.warning("Could not configure WebEngine settings - some graphics features may not work")
+            logger.warning(
+                "Could not configure WebEngine settings - some graphics features may not work"
+            )
         except Exception as e:
             logger.warning("Failed to configure WebEngine settings", error=str(e))
-        
+
         profile = QWebEngineProfile("openconnect-sso")
 
         if self.proxy:
@@ -170,7 +185,6 @@ class Process(multiprocessing.Process):
 
 
 def on_sigterm(signum, frame):
-    global profile
     logger.info("Terminate requested.")
     # Force flush cookieStore to disk. Without this hack the cookieStore may
     # not be synced at all if the browser lives only for a short amount of

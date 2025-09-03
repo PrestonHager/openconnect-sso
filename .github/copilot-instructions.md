@@ -76,7 +76,7 @@ After successful `make dev`:
 ### Dependencies and Network Issues
 - **CRITICAL**: Network timeouts to PyPI are common in containerized/sandboxed environments
 - **Workaround**: Retry `make dev` multiple times if pip install timeouts occur
-- **Alternative**: Use system Poetry if pip-installed Poetry fails: `apt install python3-poetry` 
+- **Alternative**: Use system Poetry if pip-installed Poetry fails: `apt install python3-poetry`
 - **Qt Dependencies**: Requires PyQt6 and PyQt6-WebEngine (may need system Qt libraries)
 - **Common Qt fix**: `sudo apt install libegl1` on Ubuntu systems
 - **Import errors**: Package metadata requires full installation via `make dev`
@@ -85,7 +85,7 @@ After successful `make dev`:
 
 ### Adding New Features
 1. Create new modules in `openconnect_sso/` directory
-2. Update `pyproject.toml` if adding new dependencies  
+2. Update `pyproject.toml` if adding new dependencies
 3. Add tests in `tests/` directory following existing patterns:
    - Use `@pytest.mark.asyncio` for async tests
    - Use `@pytest.mark.parametrize` for multiple test cases
@@ -165,10 +165,10 @@ After successful `make dev`:
 3. **Pre-commit installation failures**: Use `PRECOMMIT=n` flag to skip during initial setup
 4. **Qt/Display issues in headless environments**: Tests may be marked xfail, this is expected
 5. **Poetry not found**: Ensure `$HOME/.local/bin` is in PATH: `export PATH=$HOME/.local/bin:$PATH`
-6. **Package metadata errors**: 
+6. **Package metadata errors**:
    - Error: `No package metadata was found for openconnect-sso`
    - Solution: Complete `make dev` installation is required for imports to work
-7. **Network-restricted environments**: 
+7. **Network-restricted environments**:
    - Some functionality requires internet access for dependency installation
    - Consider using system package manager versions if available
 

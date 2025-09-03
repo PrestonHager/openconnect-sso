@@ -100,14 +100,19 @@ dev:  ## Initializes repository for development
 	$(echo-stage) "Updating pip in .venv..."
 	$(VENV_BIN)/python -m pip install --upgrade pip
 	$(echo-stage) "Installing openconnect-sso in develop mode..."
-	(source $(VENV_BIN)/activate && uv sync --dev)
+	if command -v uv >/dev/null 2>&1; then \
+		(source $(VENV_BIN)/activate && uv sync --dev --all-extras $(UVARGS)); \
+	else \
+		(source $(VENV_BIN)/activate && poetry install --group dev $(POETRYARGS)); \
+	fi
 	$(echo-success) "Development installation finished."
 dev: UVARGS ?= ## Additional arguments for uv sync
+dev: POETRYARGS ?= ## Additional arguments for poetry install (fallback)
 dev: PRECOMMIT ?= yes ## Install pre-commit hooks
 
 pre-commit-install:
 	@$(echo-stage) "Setting up pre-commit hooks..."
-	pre-commit install --install-hooks
+	pre-commit install-hooks
 
 .PHONY: clean
 clean:  ## Remove temporary files and artifacts
@@ -124,7 +129,7 @@ pre-commit: pre-commit-install
 
 .PHONY: test
 test:  ## Run tests
-	$(NIX_QTWRAPPER) $(VENV_BIN)/pytest
+	$(NIX_QTWRAPPER) $(VENV_BIN)/pytest --cov=openconnect_sso --cov-report=xml --cov-report=term
 
 ###############################################################################
 ## Release

@@ -1,31 +1,41 @@
-{ lib
-, openconnect
-, python3
-, python3Packages
-, buildPythonApplication
-, substituteAll
-, wrapQtAppsHook
-, qtbase
+{
+  lib,
+  openconnect,
+  python3,
+  python3Packages,
+  buildPythonApplication,
+  substituteAll,
+  wrapQtAppsHook,
+  qtbase,
 }:
 
 buildPythonApplication rec {
   pname = "openconnect-sso";
   version = "0.8.1";
   format = "setuptools";
-  
-  src = lib.cleanSource ../.; 
 
-  nativeBuildInputs = with python3Packages; [
-    setuptools
-    wheel
-  ] ++ [ wrapQtAppsHook qtbase ];
+  src = lib.cleanSource ../.;
+
+  nativeBuildInputs =
+    with python3Packages;
+    [
+      setuptools
+      wheel
+    ]
+    ++ [
+      wrapQtAppsHook
+      qtbase
+    ];
 
   # Enable modern setuptools features for pyproject.toml support
   preBuild = ''
     export SETUPTOOLS_SCM_PRETEND_VERSION=${version}
   '';
 
-  propagatedBuildInputs = [ openconnect ] ++ (with python3Packages; [
+  propagatedBuildInputs = [
+    openconnect
+  ]
+  ++ (with python3Packages; [
     attrs
     colorama
     lxml
@@ -43,9 +53,7 @@ buildPythonApplication rec {
   ]);
 
   dontWrapQtApps = true;
-  makeWrapperArgs = [
-    "\${qtWrapperArgs[@]}"
-  ];
+  makeWrapperArgs = [ "\${qtWrapperArgs[@]}" ];
 
   pythonImportsCheck = [ ]; # Disable for now due to Qt setup complexity
 
