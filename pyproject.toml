@@ -39,6 +39,14 @@ dev = [
     "pytest-httpserver>=1.1",
 ]
 
+[tool.poetry.group.dev.dependencies]
+coverage_enable_subprocess = "^1.0"
+pytest = "^8.0"
+black = "==24.10.0"
+pytest-asyncio = "^0.24.0"
+pytest-cov = "^6.0"
+pytest-httpserver = "^1.1"
+
 [project.scripts]
 openconnect-sso = "openconnect_sso.cli:main"
 

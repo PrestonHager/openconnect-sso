@@ -101,9 +101,9 @@ dev:  ## Initializes repository for development
 	$(VENV_BIN)/python -m pip install --upgrade pip
 	$(echo-stage) "Installing openconnect-sso in develop mode..."
 	if command -v uv >/dev/null 2>&1; then \
-		(source $(VENV_BIN)/activate && uv sync --all-extras $(UVARGS)); \
+		(source $(VENV_BIN)/activate && uv sync --dev --all-extras $(UVARGS)); \
 	else \
-		(source $(VENV_BIN)/activate && poetry install $(POETRYARGS)); \
+		(source $(VENV_BIN)/activate && poetry install --group dev $(POETRYARGS)); \
 	fi
 	$(echo-success) "Development installation finished."
 dev: UVARGS ?= ## Additional arguments for uv sync
