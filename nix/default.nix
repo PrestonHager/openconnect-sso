@@ -19,8 +19,7 @@ let
         which
         niv # Dependency manager for Nix expressions
         nixpkgs-fmt # To format Nix source files
-        # Note: UV package manager is not yet available in stable nixpkgs
-        # Users can install it separately: curl -LsSf https://astral.sh/uv/install.sh | sh
+        uv
       ] ++ (with pythonPackages; [
         pre-commit # To check coding style during commit
         pytest # For running tests
