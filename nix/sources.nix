@@ -72,11 +72,11 @@ let
     '';
 
   hasNixpkgsPath = (builtins.tryEval <nixpkgs>).success;
-  hasThisAsNixpkgsPath = (builtins.tryEval <nixpkgs>).success && <nixpkgs>
-    == ./.;
+  hasThisAsNixpkgsPath = (builtins.tryEval <nixpkgs>).success && <nixpkgs> == ./.;
 
   # The actual fetching function.
-  fetch = name: spec:
+  fetch =
+    name: spec:
 
     if !builtins.hasAttr "type" spec then
       abort "ERROR: niv spec ${name} does not have a 'type' attribute"
@@ -91,37 +91,44 @@ let
     else if spec.type == "builtin-url" then
       fetch_builtin-url spec
     else
-      abort
-      "ERROR: niv spec ${name} has unknown type ${builtins.toJSON spec.type}";
+      abort "ERROR: niv spec ${name} has unknown type ${builtins.toJSON spec.type}";
 
   # Ports of functions for older nix versions
 
   # a Nix version of mapAttrs if the built-in doesn't exist
-  mapAttrs = builtins.mapAttrs or (f: set:
-    with builtins;
-    listToAttrs (map (attr: {
-      name = attr;
-      value = f attr set.${attr};
-    }) (attrNames set)));
+  mapAttrs =
+    builtins.mapAttrs or (
+      f: set:
+      with builtins;
+      listToAttrs (
+        map (attr: {
+          name = attr;
+          value = f attr set.${attr};
+        }) (attrNames set)
+      )
+    );
 
   # fetchTarball version that is compatible between all the versions of Nix
-  builtins_fetchTarball = { url, sha256 }@attrs:
-    let inherit (builtins) lessThan nixVersion fetchTarball;
-    in if lessThan nixVersion "1.12" then
-      fetchTarball { inherit url; }
-    else
-      fetchTarball attrs;
+  builtins_fetchTarball =
+    { url, sha256 }@attrs:
+    let
+      inherit (builtins) lessThan nixVersion fetchTarball;
+    in
+    if lessThan nixVersion "1.12" then fetchTarball { inherit url; } else fetchTarball attrs;
 
   # fetchurl version that is compatible between all the versions of Nix
-  builtins_fetchurl = { url, sha256 }@attrs:
-    let inherit (builtins) lessThan nixVersion fetchurl;
-    in if lessThan nixVersion "1.12" then
-      fetchurl { inherit url; }
-    else
-      fetchurl attrs;
+  builtins_fetchurl =
+    { url, sha256 }@attrs:
+    let
+      inherit (builtins) lessThan nixVersion fetchurl;
+    in
+    if lessThan nixVersion "1.12" then fetchurl { inherit url; } else fetchurl attrs;
 
-in mapAttrs (name: spec:
+in
+mapAttrs (
+  name: spec:
   if builtins.hasAttr "outPath" spec then
     abort "The values in sources.json should not have an 'outPath' attribute"
   else
-    spec // { outPath = fetch name spec; }) sources
+    spec // { outPath = fetch name spec; }
+) sources
