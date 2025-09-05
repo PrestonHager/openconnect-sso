@@ -1,3 +1,4 @@
+---
 name: Release
 
 on:
@@ -7,15 +8,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-release:
-    name: Build and Release ${{ matrix.os }}/${{ matrix.python-version }}
+  build-and-test:
+    name: Build and Test ${{ matrix.os }} Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        os: [Ubuntu]
-        python-version: ["3.10", "3.11", "3.12"]
-    permissions:
-      contents: write
+        os: [ubuntu, windows]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +30,9 @@ jobs:
       - name: Get full Python version
         id: full-python-version
         shell: bash
-        run: echo "version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")" >> $GITHUB_OUTPUT
+        run: |
+          version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info[:3]))")
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Get pip cache dir
         id: pip-cache
@@ -42,7 +43,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.pip-cache.outputs.dir }}
-          key: pip-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('poetry.lock') }}
+          key: >-
+            pip-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{
+            hashFiles('poetry.lock') }}
           restore-keys: |
             pip-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-
             pip-${{ runner.os }}-
@@ -52,28 +55,61 @@ jobs:
         id: cache-venv
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('poetry.lock') }}
+          key: >-
+            venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{
+            hashFiles('poetry.lock') }}
 
-      - name: Update make
-        if: startsWith(runner.os, 'macOS')
+      - name: Install system dependencies (Ubuntu)
+        if: runner.os == 'Linux'
         run: |
-          brew install make
-          echo 'export PATH=/usr/local/opt/make/libexec/gnubin:$PATH' >> ~/.bash_profile
+          sudo apt update
+          sudo apt install libegl1 gawk
+
+      - name: Install system dependencies (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          # Windows has gawk pre-installed, just need to install make if needed
+          echo "Windows system dependencies ready"
 
       - name: Bootstrap
         shell: bash
         run: |
-          # For mac
-          [[ -f ~/.bash_profile ]] && source ~/.bash_profile
           python -m ensurepip
           python -m pip install --upgrade pip pre-commit poetry
           make PRECOMMIT=n dev
-          sudo apt update
-          sudo apt install libegl1
 
       - name: Build packages
         shell: bash
         run: make release
+
+      - name: Upload build artifacts (Ubuntu only)
+        if: matrix.os == 'ubuntu'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts-python-${{ matrix.python-version }}
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+            dist/CHANGELOG-*.md
+          retention-days: 1
+
+  release:
+    name: Create Release
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-artifacts-python-*
+          path: dist/
+          merge-multiple: true
 
       - name: Get version
         id: get_version
@@ -88,56 +124,29 @@ jobs:
           echo "Version: $VERSION"
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          release_name: Release ${{ steps.get_version.outputs.version }}
+          name: Release ${{ steps.get_version.outputs.version }}
           body: |
             ## Installation
 
             ### Using pip
             ```bash
-            pip install openconnect_sso-${{ steps.get_version.outputs.version }}-py3-none-any.whl
+            pip install openconnect_sso-${{
+            steps.get_version.outputs.version }}-py3-none-any.whl
             ```
 
             ### Using nix flakes
             ```bash
-            nix run github:PrestonHager/openconnect-sso/${{ steps.get_version.outputs.version }}
+            nix run github:PrestonHager/openconnect-sso/${{
+            steps.get_version.outputs.version }}
             ```
 
             See the [README.md](https://github.com/PrestonHager/openconnect-sso#installation) for more installation options.
           draft: false
           prerelease: false
-
-      - name: Upload wheel asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/openconnect_sso-*-py3-none-any.whl
-          asset_name: openconnect_sso-${{ steps.get_version.outputs.version }}-py3-none-any.whl
-          asset_content_type: application/octet-stream
-
-      - name: Upload source distribution asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/openconnect_sso-*.tar.gz
-          asset_name: openconnect_sso-${{ steps.get_version.outputs.version }}.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload changelog
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/CHANGELOG-${{ steps.get_version.outputs.version }}.md
-          asset_name: CHANGELOG-${{ steps.get_version.outputs.version }}.md
-          asset_content_type: text/markdown
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+            dist/CHANGELOG-*.md
