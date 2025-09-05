@@ -3,8 +3,11 @@
 Wrapper script for OpenConnect supporting Azure AD (SAMLv2) authentication
 to Cisco SSL-VPNs
 
-[![Tests Status
-](https://github.com/vlaci/openconnect-sso/workflows/Tests/badge.svg?branch=master&event=push)](https://github.com/vlaci/openconnect-sso/actions?query=workflow%3ATests+branch%3Amaster+event%3Apush)
+[![Release](https://github.com/PrestonHager/openconnect-sso/actions/workflows/release.yml/badge.svg)](https://github.com/PrestonHager/openconnect-sso/actions/workflows/release.yml)
+
+[![Tests](https://github.com/PrestonHager/openconnect-sso/actions/workflows/test.yml/badge.svg)](https://github.com/PrestonHager/openconnect-sso/actions/workflows/test.yml)
+
+[![Nix Tests](https://github.com/PrestonHager/openconnect-sso/actions/workflows/nix-tests.yml/badge.svg)](https://github.com/PrestonHager/openconnect-sso/actions/workflows/nix-tests.yml)
 
 ## Installation
 
