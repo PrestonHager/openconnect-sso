@@ -8,28 +8,72 @@ on:
 
 jobs:
   build-and-release:
-    name: Build and Release
-    runs-on: ubuntu-latest
+    name: Build and Release ${{ matrix.os }}/${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      matrix:
+        os: [Ubuntu]
+        python-version: ["3.10", "3.11", "3.12"]
     permissions:
       contents: write
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
 
-      - name: Build packages
+      - name: Get full Python version
+        id: full-python-version
+        shell: bash
+        run: echo "version=$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")" >> $GITHUB_OUTPUT
+
+      - name: Get pip cache dir
+        id: pip-cache
         run: |
-          export PATH=$HOME/.local/bin:$PATH
-          make dist
+          echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Pip cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: pip-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            pip-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-
+            pip-${{ runner.os }}-
+
+      - name: Virtualenv cache
+        uses: actions/cache@v4
+        id: cache-venv
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('poetry.lock') }}
+
+      - name: Update make
+        if: startsWith(runner.os, 'macOS')
+        run: |
+          brew install make
+          echo 'export PATH=/usr/local/opt/make/libexec/gnubin:$PATH' >> ~/.bash_profile
+
+      - name: Bootstrap
+        shell: bash
+        run: |
+          # For mac
+          [[ -f ~/.bash_profile ]] && source ~/.bash_profile
+          python -m ensurepip
+          python -m pip install --upgrade pip pre-commit poetry
+          make PRECOMMIT=n dev
+          sudo apt update
+          sudo apt install libegl1
+
+      - name: Build packages
+        shell: bash
+        run: make release
 
       - name: Get version
         id: get_version
