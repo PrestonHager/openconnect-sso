@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Build packages
+        run: |
+          export PATH=$HOME/.local/bin:$PATH
+          make dist
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(grep '^version = ' pyproject.toml | cut -d '"' -f 2)
+            VERSION="v${VERSION}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: Release ${{ steps.get_version.outputs.version }}
+          body: |
+            ## Installation
+
+            ### Using pip
+            ```bash
+            pip install openconnect_sso-${{ steps.get_version.outputs.version }}-py3-none-any.whl
+            ```
+
+            ### Using nix flakes
+            ```bash
+            nix run github:PrestonHager/openconnect-sso/${{ steps.get_version.outputs.version }}
+            ```
+
+            See the [README.md](https://github.com/PrestonHager/openconnect-sso#installation) for more installation options.
+          draft: false
+          prerelease: false
+
+      - name: Upload wheel asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/openconnect_sso-*-py3-none-any.whl
+          asset_name: openconnect_sso-${{ steps.get_version.outputs.version }}-py3-none-any.whl
+          asset_content_type: application/octet-stream
+
+      - name: Upload source distribution asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/openconnect_sso-*.tar.gz
+          asset_name: openconnect_sso-${{ steps.get_version.outputs.version }}.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload changelog
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/CHANGELOG-${{ steps.get_version.outputs.version }}.md
+          asset_name: CHANGELOG-${{ steps.get_version.outputs.version }}.md
+          asset_content_type: text/markdown
