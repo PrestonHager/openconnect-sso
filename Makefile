@@ -133,7 +133,7 @@ test:  ## Run tests
 
 ###############################################################################
 ## Release
-VERSION = $(shell $(VENV_BIN)/python -c 'import openconnect_sso; print(f"v{openconnect_sso.__version__}")')
+VERSION = $(shell if [ -f "$(VENV_BIN)/python" ]; then $(VENV_BIN)/python -c 'import openconnect_sso; print(f"v{openconnect_sso.__version__}")'; else python -c 'import openconnect_sso; print(f"v{openconnect_sso.__version__}")' 2>/dev/null || grep "^version = " pyproject.toml | cut -d '"' -f 2 | sed 's/^/v/'; fi)
 
 .PHONY: dist
 dist:  ## Build packages from whatever state the repository is
