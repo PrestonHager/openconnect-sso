@@ -125,6 +125,8 @@ jobs:
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
           name: Release ${{ steps.get_version.outputs.version }}
@@ -133,19 +135,18 @@ jobs:
 
             ### Using pip
             ```bash
-            pip install openconnect_sso-${{
-            steps.get_version.outputs.version }}-py3-none-any.whl
+            pip install openconnect_sso-${{ steps.get_version.outputs.version }}-py3-none-any.whl
             ```
 
             ### Using nix flakes
             ```bash
-            nix run github:PrestonHager/openconnect-sso/${{
-            steps.get_version.outputs.version }}
+            nix run github:PrestonHager/openconnect-sso/${{ steps.get_version.outputs.version }}
             ```
 
             See the [README.md](https://github.com/PrestonHager/openconnect-sso#installation) for more installation options.
           draft: false
           prerelease: false
+          fail_on_unmatched_files: false
           files: |
             dist/*.whl
             dist/*.tar.gz
