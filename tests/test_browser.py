@@ -5,6 +5,10 @@ import sys
 from openconnect_sso.browser import Browser, DisplayMode
 
 
+@pytest.mark.xfail(
+    sys.platform in ["darwin", "win32"],
+    reason="https://github.com/vlaci/openconnect-sso/issues/23",
+)
 @pytest.mark.asyncio
 async def test_browser_context_manager_should_work_in_empty_context_manager():
     async with Browser() as _:
