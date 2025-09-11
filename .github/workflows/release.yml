@@ -82,9 +82,15 @@ jobs:
           python -m pip install --upgrade pip pre-commit poetry
           make PRECOMMIT=n dev
 
-      - name: Build packages
+      - name: Build packages (Ubuntu - full release with checks)
+        if: matrix.os == 'ubuntu'
         shell: bash
         run: make release
+
+      - name: Build packages (Windows - build only, skip pre-commit checks)
+        if: matrix.os == 'windows'
+        shell: bash
+        run: make before-release before-clean clean dev tag-repo dist
 
       - name: Upload build artifacts (Ubuntu only)
         if: matrix.os == 'ubuntu'
