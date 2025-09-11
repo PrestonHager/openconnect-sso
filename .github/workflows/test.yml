@@ -80,7 +80,14 @@ jobs:
         run: |
           # For mac
           [[ -f ~/.bash_profile ]] && source ~/.bash_profile
-          python -m ensurepip || true
+          # Check if pip is available; if not, try to bootstrap it and log any errors
+          if ! python -m pip --version >/dev/null 2>&1; then
+            echo "pip not found, attempting to run ensurepip..."
+            if ! python -m ensurepip; then
+              echo "ERROR: ensurepip failed to install pip" >&2
+              exit 1
+            fi
+          fi
           python -m pip install --upgrade pip pre-commit poetry
           make PRECOMMIT=n dev
 
