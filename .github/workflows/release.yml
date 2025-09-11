@@ -36,6 +36,7 @@ jobs:
 
       - name: Get pip cache dir
         id: pip-cache
+        shell: bash
         run: |
           echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
 
@@ -75,7 +76,7 @@ jobs:
       - name: Bootstrap
         shell: bash
         run: |
-          python -m ensurepip
+          python -m ensurepip || true
           python -m pip install --upgrade pip pre-commit poetry
           make PRECOMMIT=n dev
 

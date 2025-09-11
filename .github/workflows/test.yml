@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        os: [Ubuntu]
+        os: [Ubuntu, Windows]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
@@ -36,6 +36,7 @@ jobs:
 
       - name: Get pip cache dir
         id: pip-cache
+        shell: bash
         run: |
           echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
 
@@ -61,16 +62,34 @@ jobs:
           brew install make
           echo 'export PATH=/usr/local/opt/make/libexec/gnubin:$PATH' >> ~/.bash_profile
 
+      - name: Install system dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install libegl1 gawk
+
+      - name: Install system dependencies (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          # Windows has gawk pre-installed, just need to install make if needed
+          echo "Windows system dependencies ready"
+
       - name: Bootstrap
         shell: bash
         run: |
           # For mac
           [[ -f ~/.bash_profile ]] && source ~/.bash_profile
-          python -m ensurepip
+          # Check if pip is available; if not, try to bootstrap it and log any errors
+          if ! python -m pip --version >/dev/null 2>&1; then
+            echo "pip not found, attempting to run ensurepip..."
+            if ! python -m ensurepip; then
+              echo "ERROR: ensurepip failed to install pip" >&2
+              exit 1
+            fi
+          fi
           python -m pip install --upgrade pip pre-commit poetry
           make PRECOMMIT=n dev
-          sudo apt update
-          sudo apt install libegl1
 
       - name: Run pytest with coverage
         shell: bash
