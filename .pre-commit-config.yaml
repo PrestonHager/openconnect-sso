@@ -25,6 +25,6 @@ repos:
     hooks:
       - id: nixfmt
         name: nixfmt
-        entry: bash -c 'case "$(uname -s)" in MINGW*|CYGWIN*|MSYS*) exit 0;; Linux*|Darwin*) nixfmt "$@";; *) exit 1;; esac' --
+        entry: bash -c 'case "$(uname -s)" in Linux*|Darwin*) nixfmt "$@";; *) exit 0;; esac' --
         language: system
         files: \.nix$
