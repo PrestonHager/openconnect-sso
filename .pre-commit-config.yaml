@@ -24,3 +24,7 @@ repos:
     rev: "v1.0.0"
     hooks:
       - id: nixfmt
+        name: nixfmt
+        entry: bash -c 'case "$(uname -s)" in Linux*|Darwin*) nixfmt "$@";; *) exit 0;; esac' --
+        language: system
+        files: \.nix$
