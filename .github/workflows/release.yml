@@ -83,16 +83,9 @@ jobs:
 
       - name: Install nixfmt
         if: matrix.os == 'ubuntu'
-        run: |
-          nix-shell -p nixfmt-rfc-style --run "echo 'nixfmt installed successfully'"
-          # Add nixfmt to PATH by creating a wrapper script
-          mkdir -p ~/.local/bin
-          cat > ~/.local/bin/nixfmt << 'EOF'
-          #!/bin/bash
-          exec nix-shell -p nixfmt-rfc-style --run "nixfmt $(printf '%q ' "$@")"
-          EOF
-          chmod +x ~/.local/bin/nixfmt
-          echo "~/.local/bin" >> $GITHUB_PATH
+        uses: yaxitech/nix-install-pkgs-action@v7
+        with:
+          packages: "nixpkgs#nixfmt-rfc-style"
 
       - name: Bootstrap
         shell: bash
