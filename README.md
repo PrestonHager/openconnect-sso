@@ -34,7 +34,7 @@ The easiest method to try is by installing directly:
 $ nix-env -i -f https://github.com/PrestonHager/openconnect-sso/archive/main.tar.gz
 unpacking 'https://github.com/PrestonHager/openconnect-sso/archive/main.tar.gz'...
 [...]
-installing 'openconnect-sso-0.8.1'
+installing 'openconnect-sso-0.8.2'
 [...]
 $ openconnect-sso
 ```
@@ -70,7 +70,7 @@ Download the latest release from [GitHub Releases](https://github.com/PrestonHag
 $ pip install openconnect_sso-*.whl
 
 # Or install directly from GitHub release URL
-$ pip install https://github.com/PrestonHager/openconnect-sso/releases/latest/download/openconnect_sso-0.8.1-py3-none-any.whl
+$ pip install https://github.com/PrestonHager/openconnect-sso/releases/latest/download/openconnect_sso-0.8.2-py3-none-any.whl
 ```
 
 ### Building from Source
@@ -241,3 +241,21 @@ $ result/bin/openconnect-sso --help
 Alternatively you may just [get UV](https://docs.astral.sh/uv/#installation) and
 start developing by using the included `Makefile`. Type `make help` to see the
 possible make targets.
+
+### Contributing using Fedora
+
+Install these packages for development:
+
+```shell
+sudo dnf install python-pip libatomic libxkbfile uv poetry nix
+```
+
+### Lock Files
+
+Don't forget to update the lock files when contributing:
+
+```shell
+uv lock
+poetry lock
+nix flake update
+```

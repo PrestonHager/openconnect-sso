@@ -11,7 +11,7 @@
 
 buildPythonApplication rec {
   pname = "openconnect-sso";
-  version = "0.8.1";
+  version = "0.8.2";
   format = "setuptools";
 
   src = lib.cleanSource ../.;

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.8.2
+
+- fix #34
+
 ## v0.8.1
 
 - Updating dependencies
